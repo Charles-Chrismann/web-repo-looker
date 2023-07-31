@@ -1,0 +1,35 @@
+
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>App</title>
+  </head>
+  <body>
+
+
+    <h1>Web Repo Looker</h1>
+
+    <form>
+      <input type="text" name="url" placeholder="Past repo url" />
+      <input type="submit" value="Search" />
+    </form>
+
+    <h2 id="result"></h2>
+
+    <ul>
+      {{#each users}}
+        <li>
+          <h4>{{ this.user }}</h4>
+          <ul>
+            {{#each this.repos}}
+              <li><a href="/repos/{{ ../this.user }}/{{ this }}/">{{ this }}</a></li>
+            {{/each}}
+          </ul>
+        </li>
+      {{/each}}
+    </ul>
+
+    <script src="scripts/index.js"></script>
+  </body>
+</html>
