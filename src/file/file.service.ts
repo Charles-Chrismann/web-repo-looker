@@ -1,13 +1,19 @@
+import * as fs from 'fs';
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
-import * as fs from 'fs';
-import { CustomHttpException } from 'src/Custom/custom-http.exception';
 const JsZip = require("jszip")
+import { v4 as uuidv4 } from 'uuid';
+
+import { CustomHttpException } from 'src/Custom/custom-http.exception';
+import { DlWsGateway } from 'src/dl-ws/dl-ws.gateway';
 
 @Injectable()
 export class FileService {
 
-  async downloadFile(url: string): Promise<string> {
+  constructor(private readonly dlWsGateway: DlWsGateway) {}
+
+  async downloadFile(url: string, socketId: string): Promise<string> {
+
     const acceptedPaterns = [
       /^https:\/\/github\.com\/[a-zA-Z0-9\-]{1,39}\/[a-zA-Z0-9-_]+\/archive\/refs\/heads\/.+\.zip\/?$/,
       /^https:\/\/github\.com\/[a-zA-Z0-9\-]{1,39}\/[a-zA-Z0-9-_]+\/?$/,
@@ -32,6 +38,12 @@ export class FileService {
     }
 
     console.log(username, repo, branch)
+
+    const repoData = await axios({
+      url: `https://api.github.com/repos/${username}/${repo}`,
+      method: 'GET',
+    });
+    console.log(repoData.data)
     
       return new Promise(async (resolve, reject) => {
         
@@ -46,20 +58,32 @@ export class FileService {
           return reject(error)
         }
   
-        const writer = fs.createWriteStream('downloads/repo.zip')
+        const zipName = `repo-${uuidv4()}.zip`
+        const writer = fs.createWriteStream('downloads/' + zipName)
   
         response.data.pipe(writer)
+
+        let downloadedSize = 0
+        let lastpercentage = 0
+        response.data.on('data', (chunk) => {
+          if(!socketId) return
+          downloadedSize += (chunk.length / 1024) / repoData.data.size * 100
+          const percentage = Math.trunc(downloadedSize)
+          if(percentage === lastpercentage) return
+          lastpercentage = percentage
+          this.dlWsGateway.server.sockets.sockets.get(socketId).emit('progress', { step: 'cloning', progress: percentage})
+        })
   
         writer.on('finish', () => {
-          fs.readFile('downloads/repo.zip', async (err, data) => {
+          fs.readFile('downloads/' + zipName, async (err, data) => {
             if(err) throw err;
-            console.log(data)
             let zip = await JsZip.loadAsync(data)
             zip.forEach(async (relativePath, zipEntry) => {
               let content = await zipEntry.async('nodebuffer')
               if(relativePath.endsWith('/')) fs.mkdirSync(`public/repos/${username}/${relativePath}`, { recursive: true })
               else fs.writeFileSync(`public/repos/${username}/${relativePath}`, content)
             });
+            fs.unlinkSync('downloads/' + zipName)
             resolve(`/repos/${username}/${repo}-${branch}`)
           });
         })

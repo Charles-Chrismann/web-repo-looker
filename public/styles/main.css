@@ -41,6 +41,33 @@ body .clone-bar form button {
   border-radius: 6px;
   font-size: 24px;
 }
+body .clone-bar #status {
+  margin-top: 1rem;
+  height: 32px;
+  width: 100%;
+  border-radius: 6px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: relative;
+  overflow: hidden;
+  padding: 0 1rem;
+  font-weight: bold;
+  border: solid 1px orange;
+  color: white;
+}
+body .clone-bar #status.hidden {
+  display: none;
+}
+body .clone-bar #status .progress {
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: var(--progress);
+  background-color: orange;
+  z-index: -1;
+}
 body .clone-bar h4#result {
   margin-top: 16px;
   height: 64px;

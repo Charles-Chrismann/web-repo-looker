@@ -8,9 +8,9 @@ export class FileController {
     constructor(private readonly fileService: FileService) {}
 
     @Post('clone')
-    async downloadZip(@Body('url') url: string): Promise<{ url: string; user: string; repo: string }>  {
+    async downloadZip(@Body('url') url: string, @Body('socketId') socketId: string): Promise<{ url: string; user: string; repo: string }>  {
         try {
-            const publicUrl = await this.fileService.downloadFile(url)
+            const publicUrl = await this.fileService.downloadFile(url, socketId)
             const [user, repo] = url.split('/').slice(3, 5)
             return {
                 url: publicUrl,

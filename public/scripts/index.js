@@ -23,6 +23,7 @@ const form = document.querySelector('form');
 const result = document.querySelector('#result');
 const userTemplate = document.querySelector('#user-template');
 const repoTemplate = document.querySelector('#repo-template');
+const statusEl = document.querySelector('#status');
 
 document.querySelector('#result .fa-regular.fa-copy').addEventListener('click', (e) => {
     navigator.clipboard.writeText(location + result.querySelector('.result').textContent.substring(1)).then(
@@ -34,6 +35,8 @@ document.querySelector('#result .fa-regular.fa-copy').addEventListener('click', 
 
 form.addEventListener('submit', (e) => {
     e.preventDefault();
+    result.classList.add('hidden');
+    statusEl.classList.remove('hidden');
     fetch(`/api/file/clone`, {
         method: 'POST',
         headers: {
@@ -41,10 +44,12 @@ form.addEventListener('submit', (e) => {
         },
         body: JSON.stringify({
             url: form.elements.url.value,
+            socketId: socketId,
         }),
     }).then((response) => response.json())
     .then((data) => {
         result.classList.remove('hidden', 'error', 'success');
+        statusEl.classList.add('hidden');
         if (data.message) {
             result.classList.add('error');
             result.querySelector('.result').textContent = data.message;

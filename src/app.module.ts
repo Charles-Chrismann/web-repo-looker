@@ -5,6 +5,7 @@ import { join } from 'path';
 import { ServeStaticModule } from '@nestjs/serve-static';
 import { ApiController } from './api.controller';
 import { FileModule } from './file/file.module';
+import { DlWsModule } from './dl-ws/dl-ws.module';
 
 @Module({
   imports: [
@@ -12,6 +13,7 @@ import { FileModule } from './file/file.module';
       rootPath: join(__dirname, '..', 'public'),
     }),
     FileModule,
+    DlWsModule,
   ],
   controllers: [AppController, ApiController],
   providers: [AppService],

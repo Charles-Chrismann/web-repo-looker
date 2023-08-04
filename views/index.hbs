@@ -6,8 +6,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Web Repo Looker</title>
     <link rel="stylesheet" href="styles/main.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.socket.io/4.4.1/socket.io.min.js" integrity="sha384-fKnu0iswBIqkjxrhQCTZ7qlLHOFEgNkRmK2vaO/LbTZSXdJfAu6ewRBdwHPhBo/H" crossorigin="anonymous"></script>
   </head>
   <body>
 
@@ -19,6 +20,12 @@
         <input type="text" name="url" placeholder="Past repo url" />
         <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
       </form>
+      
+      <div id="status" class="hidden">
+        <span class="step"></span>
+        <span class="percentage"></span>
+        <div class="progress"></div>
+      </div>
 
       <h4 id="result" class="hidden">
         <span class="result"></span>
@@ -72,5 +79,6 @@
       </li>
     </template>
     <script src="scripts/index.js"></script>
+    <script src="scripts/ws.js"></script>
   </body>
 </html>
