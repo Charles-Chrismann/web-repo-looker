@@ -2,34 +2,75 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <meta charset="utf-8" />
-    <title>App</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Web Repo Looker</title>
+    <link rel="stylesheet" href="styles/main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css" integrity="sha512-z3gLpd7yknf1YoNbCzqRKc4qyor8gaKU1qmn+CShxbuBusANI9QpRohGBreCFkKxLhei6S9CQXFEbbKuqLg0DA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
   </head>
   <body>
 
 
     <h1>Web Repo Looker</h1>
 
-    <form>
-      <input type="text" name="url" placeholder="Past repo url" />
-      <input type="submit" value="Search" />
-    </form>
+    <div class="clone-bar">
+      <form>
+        <input type="text" name="url" placeholder="Past repo url" />
+        <button type="submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+      </form>
 
-    <h2 id="result"></h2>
+      <h4 id="result" class="hidden">
+        <span class="result"></span>
+        <div class="infos">
+          <i class="fa-regular fa-copy"></i>
+          <a href="#" target="_blank" rel="noopener noreferrer">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i>
+          </a>
+        </div>
+      </h4>
+    </div>
 
-    <ul>
+    <h2 class="users">Already Cloned Repos</h2>
+    <ul id="users">
       {{#each users}}
-        <li>
-          <h4>{{ this.user }}</h4>
-          <ul>
+        <li class="user">
+          <div class="user__infos">
+            <a href="https://github.com/{{ this.user }}" target="_blank" rel="noopener noreferrer">
+              <img src="https://github.com/{{ this.user }}.png?size=32" alt="{{ this.user }}">
+            </a>
+            <h4>
+              <a href="https://github.com/{{ this.user }}" target="_blank" rel="noopener noreferrer">{{ this.user }}</a>
+            </h4>
+          </div>
+          <ul class="repos">
             {{#each this.repos}}
-              <li><a href="/repos/{{ ../this.user }}/{{ this }}/">{{ this }}</a></li>
+              <li><a href="/repos/{{ ../this.user }}/{{ this }}">{{ this }}</a></li>
             {{/each}}
           </ul>
         </li>
       {{/each}}
     </ul>
 
+    <template id="user-template">
+      <li class="user">
+        <div class="user__infos">
+          <a href="#" target="_blank" rel="noopener noreferrer">
+            <img src="" alt="">
+          </a>
+          <h4>
+            <a href="#" target="_blank" rel="noopener noreferrer"></a>
+          </h4>
+        </div>
+        <ul class="repos"></ul>
+      </li>
+    </template>
+
+    <template id="repo-template">
+      <li>
+        <a href="#"></a>
+      </li>
+    </template>
     <script src="scripts/index.js"></script>
   </body>
 </html>

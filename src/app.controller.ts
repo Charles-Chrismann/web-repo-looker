@@ -12,6 +12,7 @@ export class AppController {
     let users = [] as { user: string, repos: string[] }[]
 
     fs.readdirSync('public/repos').forEach(user => {
+      if(user === '.gitkeep') return;
       console.log(user);
       users.push({ 
         user: user,

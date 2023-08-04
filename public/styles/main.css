@@ -1,0 +1,100 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  border: none;
+  outline: none;
+  font-family: "Roboto", sans-serif;
+  color: unset;
+  list-style: none;
+  text-decoration: none;
+}
+
+body {
+  background: #010409;
+  padding: 0 10%;
+}
+body h1 {
+  color: #ffffff;
+  margin-top: 2rem;
+  margin-bottom: 2rem;
+}
+body .clone-bar {
+  width: 100%;
+  margin-bottom: 4rem;
+}
+body .clone-bar form {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+}
+body .clone-bar form input {
+  width: 100%;
+  border-radius: 6px;
+  padding: 0 1rem;
+}
+body .clone-bar form button {
+  aspect-ratio: 1/1;
+  height: 64px;
+  border-radius: 6px;
+  font-size: 24px;
+}
+body .clone-bar h4#result {
+  margin-top: 16px;
+  height: 64px;
+  border: solid 1px;
+  background: #161b22;
+  display: flex;
+  align-items: center;
+  padding: 0 1rem;
+  justify-content: space-between;
+  border-color: var(--color);
+  color: var(--color);
+  border-radius: 6px;
+}
+body .clone-bar h4#result.hidden {
+  display: none;
+}
+body .clone-bar h4#result .infos {
+  display: none;
+}
+body .clone-bar h4#result .infos i {
+  cursor: pointer;
+}
+body .clone-bar h4#result.success {
+  --color: green;
+}
+body .clone-bar h4#result.success .infos {
+  display: block;
+}
+body .clone-bar h4#result.error {
+  --color: red;
+}
+body h2.users {
+  color: #ffffff;
+  padding-bottom: 16px;
+}
+body #users li.user {
+  list-style: none;
+  background: #161b22;
+  border: solid 1px #30363d;
+  padding: 0.75rem 0.5rem;
+  border-radius: 6px;
+  margin-bottom: 1.5rem;
+}
+body #users li.user .user__infos {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+body #users li.user .user__infos img {
+  aspect-ratio: 1/1;
+  border-radius: 50%;
+}
+body #users li.user ul.repos {
+  padding-left: 40px;
+}
+
+/*# sourceMappingURL=main.css.map */

@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import * as fs from 'fs';
+import { CustomHttpException } from 'src/Custom/custom-http.exception';
 const JsZip = require("jszip")
 
 @Injectable()
@@ -13,7 +14,11 @@ export class FileService {
       /^https:\/\/github\.com\/[a-zA-Z0-9\-]{1,39}\/[a-zA-Z0-9-_]+\/tree\/[a-zA-Z0-9\-]+\/?$/
     ]
 
-    if(!acceptedPaterns.some(patern => patern.test(url))) return
+    if(!acceptedPaterns.some(patern => patern.test(url))) throw new CustomHttpException({
+      statusCode: 400,
+      message: 'Invalid url',
+      error: 'Bad Request',
+    })
 
     const [username, repo] = url.split('/').slice(3, 5)
 
@@ -41,12 +46,12 @@ export class FileService {
           return reject(error)
         }
   
-        const writer = fs.createWriteStream('downloads/test.zip')
+        const writer = fs.createWriteStream('downloads/repo.zip')
   
         response.data.pipe(writer)
   
         writer.on('finish', () => {
-          fs.readFile('downloads/test.zip', async (err, data) => {
+          fs.readFile('downloads/repo.zip', async (err, data) => {
             if(err) throw err;
             console.log(data)
             let zip = await JsZip.loadAsync(data)
