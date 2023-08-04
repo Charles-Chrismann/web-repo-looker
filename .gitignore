@@ -4,6 +4,8 @@
 /public/repos/*
 !/public/repos/.gitkeep
 
+.sass-cache/
+
 # compiled output
 /dist
 /node_modules
