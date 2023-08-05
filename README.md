@@ -43,6 +43,7 @@ $ npm run test:cov
 ## TODO
 
 - Add middleware before static ressources loading to prevent relative urls problems
+- Add path to dist/build in link url
 
 ## License
 

@@ -80,10 +80,10 @@ export class FileService {
             let zip = await JsZip.loadAsync(data)
             zip.forEach(async (relativePath, zipEntry) => {
               let content = await zipEntry.async('nodebuffer')
-              if(relativePath.endsWith('/')) fs.mkdirSync(`public/repos/${username}/${relativePath}`, { recursive: true })
-              else fs.writeFileSync(`public/repos/${username}/${relativePath}`, content)
+              if(relativePath.endsWith('/')) await fs.promises.mkdir(`public/repos/${username}/${relativePath}`, { recursive: true })
+              else await fs.promises.writeFile(`public/repos/${username}/${relativePath}`, content,)
             });
-            fs.unlinkSync('downloads/' + zipName)
+            fs.unlink('downloads/' + zipName, () => {})
             resolve(`/repos/${username}/${repo}-${branch}`)
           });
         })
