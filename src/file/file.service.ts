@@ -29,6 +29,13 @@ export class FileService {
     })
 
     let [username, repo] = url.split('/').slice(3, 5)
+    
+    const repoData = await axios({
+      url: `https://api.github.com/repos/${username}/${repo}`,
+      method: 'GET',
+    });
+
+    [username, repo] = repoData.data.full_name.split('/')
 
     let branch: string
     if(url.includes('.zip')) {
@@ -36,17 +43,10 @@ export class FileService {
     } else if (url.includes('tree')) {
       branch = url.split('/').at(-1)
     } else {
-      branch = 'main' // master check needed
+      branch = repoData.data.default_branch
     }
 
     console.log(username, repo, branch)
-
-    const repoData = await axios({
-      url: `https://api.github.com/repos/${username}/${repo}`,
-      method: 'GET',
-    });
-
-    [username, repo] = repoData.data.full_name.split('/')
 
     console.log(repoData.data)
     
