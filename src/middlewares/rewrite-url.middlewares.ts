@@ -1,7 +1,4 @@
 export default function RewriteUrlMiddleware(req, res, next) {
-  // console.log(req)
-  console.log('url', req.url)
-  console.log('referer', req.headers.referer)
   if(
     // brak on http://localhost:3000/todo_react_app/build/favicon.ico
     !(
@@ -26,17 +23,13 @@ export default function RewriteUrlMiddleware(req, res, next) {
     // prevent url like /{repoName}/build/...
     const splitedUrl = req.url.split('/')
     let repoNameIndexInUrl = splitedUrl.findIndex((e) => e === repo.split('-' + branch)[0]) // can break if repo name contains branch name
-    console.log(repoNameIndexInUrl, repo + '-' + branch)
     if(repoNameIndexInUrl !== -1) splitedUrl.splice(repoNameIndexInUrl, 1)
-    console.log(splitedUrl)
 
     let startFinalUrlSplited = req.headers.referer.split('/').slice(3)
-    console.log(startFinalUrlSplited)
     if(startFinalUrlSplited.at(-1) !== '') startFinalUrlSplited.pop()
     startFinalUrlSplited = startFinalUrlSplited.join('/')
 
     req.url = `/${startFinalUrlSplited}${splitedUrl.join('/')}`
-    console.log('final url', req.url)
   }
   next()
 }

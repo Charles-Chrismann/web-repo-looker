@@ -1,4 +1,6 @@
 import * as fs from 'fs';
+import * as util from 'util';
+import { exec } from 'child_process';
 import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 const JsZip = require("jszip")
@@ -77,14 +79,49 @@ export class FileService {
         writer.on('finish', () => {
           fs.readFile('downloads/' + zipName, async (err, data) => {
             if(err) throw err;
+            let hasAPackageJson = false
             let zip = await JsZip.loadAsync(data)
-            zip.forEach(async (relativePath, zipEntry) => {
-              let content = await zipEntry.async('nodebuffer')
-              if(relativePath.endsWith('/')) await fs.promises.mkdir(`public/repos/${username}/${relativePath}`, { recursive: true })
-              else await fs.promises.writeFile(`public/repos/${username}/${relativePath}`, content,)
-            });
+            console.log(zip)
+
+            let filesPromises = []
+
+            zip.forEach(async (relativePath: string, zipEntry) => {
+              console.log(relativePath)
+              if(relativePath.endsWith('/')) {
+                filesPromises.push(fs.promises.mkdir(`public/repos/${username}/${relativePath}`, { recursive: true }))
+              } else {
+                if(relativePath.endsWith('package.json') && relativePath.split('/').length === 2) hasAPackageJson = true
+                let content = await zipEntry.async('nodebuffer')
+                filesPromises.push(fs.promises.writeFile(`public/repos/${username}/${relativePath}`, content))
+              }
+            })
+            
+            await Promise.all(filesPromises)
             fs.unlink('downloads/' + zipName, () => {})
-            resolve(`/repos/${username}/${repo}-${branch}`)
+            
+            let buildFolderName = '';
+            if(hasAPackageJson) {
+              console.log('has a package.json, running npm install ...')
+              try {
+                {
+                  const { stdout, stderr } = await util.promisify(exec)(`cd public/repos/${username}/${repo}-${branch} && npm install`)
+                  console.log(stdout, stderr)
+                }
+                const folderBeforeBuild = (await fs.promises.readdir(`public/repos/${username}/${repo}-${branch}`, { withFileTypes: true })).filter(dirent => dirent.isDirectory()).map(dirent => dirent.name)
+                {
+                  const { stdout, stderr } = await util.promisify(exec)(`cd public/repos/${username}/${repo}-${branch} && npm run build`)
+                  console.log(stdout, stderr)
+                }
+
+                const currentFolders = (await fs.promises.readdir(`public/repos/${username}/${repo}-${branch}`, { withFileTypes: true })).filter(dirent => dirent.isDirectory()).map(dirent => dirent.name)
+                buildFolderName = currentFolders.find(folder => folderBeforeBuild.indexOf(folder) === -1)
+
+              } catch (error) {
+                console.log("Failed to run npm install")
+                console.log(error)
+              }
+            }
+            resolve(`/repos/${username}/${repo}-${branch}/${buildFolderName}`)
           });
         })
         writer.on('error', reject)

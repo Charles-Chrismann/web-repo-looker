@@ -52,7 +52,7 @@
           </div>
           <ul class="repos">
             {{#each this.repos}}
-              <li><a href="/repos/{{ ../this.user }}/{{ this }}">{{ this }}</a></li>
+              <li><a href="/repos/{{ ../this.user }}/{{ this }}" target="_blank">{{ this }}</a></li>
             {{/each}}
           </ul>
         </li>
@@ -75,7 +75,7 @@
 
     <template id="repo-template">
       <li>
-        <a href="#"></a>
+        <a href="#" target="_blank"></a>
       </li>
     </template>
     <script src="scripts/index.js"></script>

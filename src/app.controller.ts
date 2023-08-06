@@ -13,7 +13,6 @@ export class AppController {
 
     fs.readdirSync('public/repos').forEach(user => {
       if(user === '.gitkeep') return;
-      console.log(user);
       users.push({ 
         user: user,
         repos: []
@@ -24,7 +23,6 @@ export class AppController {
       });
     });
 
-    console.log(JSON.stringify(users));
     return { 
       message: 'Hello world! rendered',
       users: users

@@ -80,7 +80,7 @@ form.addEventListener('submit', (e) => {
             const existringRepo = Array.from(user.querySelectorAll('.repos > li > a')).map((el) => el.attributes.href.value).includes(data.url);
             if(!existringRepo) {
                 const repoClone = repoTemplate.content.cloneNode(true);
-                repoClone.querySelector('li > a').textContent = data.url.split('/').at(-1);
+                repoClone.querySelector('li > a').textContent = data.url.split('/').at(3);
                 repoClone.querySelector('li > a').attributes.href.value = data.url;
                 user.querySelector('.repos').appendChild(repoClone);
             }

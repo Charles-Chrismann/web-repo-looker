@@ -13,7 +13,6 @@ import { DlWsModule } from './dl-ws/dl-ws.module';
       rootPath: join(__dirname, '..', 'public'),
     }),
     FileModule,
-    DlWsModule,
   ],
   controllers: [AppController, ApiController],
   providers: [
