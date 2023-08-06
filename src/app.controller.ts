@@ -10,7 +10,7 @@ export class AppController {
   @Render('index')
   root() {
     let users = [] as { user: string, repos: string[] }[]
-
+    console.log(fs.readdirSync('public/repos'));
     fs.readdirSync('public/repos').forEach(user => {
       if(user === '.gitkeep') return;
       users.push({ 

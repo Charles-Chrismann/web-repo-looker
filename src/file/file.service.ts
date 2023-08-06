@@ -28,7 +28,7 @@ export class FileService {
       error: 'Bad Request',
     })
 
-    const [username, repo] = url.split('/').slice(3, 5)
+    let [username, repo] = url.split('/').slice(3, 5)
 
     let branch: string
     if(url.includes('.zip')) {
@@ -45,6 +45,9 @@ export class FileService {
       url: `https://api.github.com/repos/${username}/${repo}`,
       method: 'GET',
     });
+
+    [username, repo] = repoData.data.full_name.split('/')
+
     console.log(repoData.data)
     
       return new Promise(async (resolve, reject) => {
@@ -79,12 +82,11 @@ export class FileService {
         writer.on('finish', () => {
           fs.readFile('downloads/' + zipName, async (err, data) => {
             if(err) throw err;
-            let hasAPackageJson = false
-            let zip = await JsZip.loadAsync(data)
-            console.log(zip)
 
             let filesPromises = []
+            let hasAPackageJson = false
 
+            let zip = await JsZip.loadAsync(data)
             zip.forEach(async (relativePath: string, zipEntry) => {
               console.log(relativePath)
               if(relativePath.endsWith('/')) {
