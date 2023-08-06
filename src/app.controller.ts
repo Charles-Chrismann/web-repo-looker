@@ -8,24 +8,20 @@ export class AppController {
 
   @Get()
   @Render('index')
-  root() {
+  async root() {
     let users = [] as { user: string, repos: string[] }[]
-    console.log(fs.readdirSync('public/repos'));
-    fs.readdirSync('public/repos').forEach(user => {
-      if(user === '.gitkeep') return;
-      users.push({ 
-        user: user,
-        repos: []
+    const repos = (await fs.promises.readdir('public/repos')).filter(user => user !== '.gitkeep')
+    await Promise.all(repos.map(async user => {
+      const userData = JSON.parse((await fs.promises.readFile(`public/repos/${user}/manifest.json`)).toString())
+      users.push({
+        user,
+        repos: userData.repos.map(repo => `${repo.name}-${repo.branch}`)
       });
-
-      fs.readdirSync(`public/repos/${user}`).forEach(repo => {
-        users[users.length - 1].repos.push(repo);
-      });
-    });
+    }))
 
     return { 
       message: 'Hello world! rendered',
-      users: users
+      users
     };
   }
 }

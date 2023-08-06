@@ -29,7 +29,7 @@ export class FileService {
     })
 
     let [username, repo] = url.split('/').slice(3, 5)
-    
+
     const repoData = await axios({
       url: `https://api.github.com/repos/${username}/${repo}`,
       method: 'GET',
@@ -83,12 +83,29 @@ export class FileService {
           fs.readFile('downloads/' + zipName, async (err, data) => {
             if(err) throw err;
 
+            let userManifest: { username: string, repos: { name: string, branch: string }[] }
+            try {
+              userManifest = JSON.parse((await fs.promises.readFile(`public/repos/${username}/manifest.json`)).toString())
+            } catch (error) {
+              await fs.promises.mkdir(`public/repos/${username}`, { recursive: true })
+              userManifest = {
+                username,
+                repos: []
+              }
+            }
+            if(!userManifest.repos.some(r => r.name === repo && r.branch === branch)) {
+              userManifest.repos.push({
+                name: repo,
+                branch,
+              })
+              await fs.promises.writeFile(`public/repos/${username}/manifest.json`, JSON.stringify(userManifest))
+            }
+
             let filesPromises = []
             let hasAPackageJson = false
 
             let zip = await JsZip.loadAsync(data)
             zip.forEach(async (relativePath: string, zipEntry) => {
-              console.log(relativePath)
               if(relativePath.endsWith('/')) {
                 filesPromises.push(fs.promises.mkdir(`public/repos/${username}/${relativePath}`, { recursive: true }))
               } else {
