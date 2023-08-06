@@ -15,6 +15,7 @@ export class FileService {
   constructor(private readonly dlWsGateway: DlWsGateway) {}
 
   async downloadFile(url: string, socketId: string): Promise<string> {
+    const socket = this.dlWsGateway.server.sockets.sockets.get(socketId)
 
     const acceptedPaterns = [
       /^https:\/\/github\.com\/[a-zA-Z0-9\-]{1,39}\/[a-zA-Z0-9-_]+\/archive\/refs\/heads\/.+\.zip\/?$/,
@@ -71,13 +72,17 @@ export class FileService {
 
     let downloadedSize = 0
     let lastpercentage = 0
+
     response.data.on('data', (chunk) => {
       if(!socketId) return
       downloadedSize += (chunk.length / 1024) / repoData.data.size * 100
       const percentage = Math.trunc(downloadedSize)
-      if(percentage === lastpercentage) return
+      if(percentage === lastpercentage || percentage % 10 !== 0) {
+        lastpercentage = percentage
+        return
+      }
       lastpercentage = percentage
-      this.dlWsGateway.server.sockets.sockets.get(socketId).emit('progress', { step: 'cloning', progress: percentage})
+      if(socket) socket.emit('progress', { step: 'cloning', progress: percentage})
     })
     
     await new Promise((resolve, reject) => {
@@ -85,8 +90,8 @@ export class FileService {
       writer.on('error', reject)
     })
 
+    if(socket) socket.emit('progress', { step: 'checking existing repos', progress: 0})
     const data = await fs.promises.readFile('downloads/' + zipName);
-    console.log('file downloaded', data)
 
     let userManifest: { username: string, repos: { name: string, branch: string }[] }
     try {
@@ -106,6 +111,8 @@ export class FileService {
       await fs.promises.writeFile(`public/repos/${username}/manifest.json`, JSON.stringify(userManifest))
     }
 
+
+    if(socket) socket.emit('progress', { step: 'unziping', progress: 0})
     let foldersPromises: Promise<any>[] = []
     let filesPromises: Promise<any>[] = []
     let hasAPackageJson = false
@@ -125,23 +132,63 @@ export class FileService {
       }
     }
     
-    await Promise.all(foldersPromises)
-    await Promise.all(filesPromises)
+    try {
+      await Promise.all(foldersPromises)
+      await Promise.all(filesPromises)
+    } catch(err) {
+      throw new Error('Failed to unzip')
+    }
     fs.unlink('downloads/' + zipName, () => {})
       
     let buildFolderName = '';
     if(hasAPackageJson) {
       console.log('has a package.json, running npm install ...')
       try {
-        {
-          const { stdout, stderr } = await util.promisify(exec)(`cd public/repos/${username}/${repo}-${branch} && npm install`)
-          console.log(stdout, stderr)
-        }
-        const folderBeforeBuild = (await fs.promises.readdir(`public/repos/${username}/${repo}-${branch}`, { withFileTypes: true })).filter(dirent => dirent.isDirectory()).map(dirent => dirent.name)
-        {
-          const { stdout, stderr } = await util.promisify(exec)(`cd public/repos/${username}/${repo}-${branch} && npm run build`)
-          console.log(stdout, stderr)
-        }
+        if(socket) socket.emit('progress', { step: 'Installing dependencies ...', progress: 0})
+        await new Promise<void>((resolve, reject) => {
+          const npmInstallProcess = exec(`cd public/repos/${username}/${repo}-${branch} && npm install`);
+          npmInstallProcess.stdout.on('data', (data) => {
+            console.log(data); // Afficher les sorties de npm install dans la console
+            if(socket) socket.emit('progress', { step: 'Installing dependencies ...', progress: 0, message: data})
+          });
+          npmInstallProcess.stderr.on('data', (data) => {
+            console.error(data); // Afficher les erreurs de npm install dans la console
+          });
+          npmInstallProcess.on('close', (code) => {
+            if(code === 0) {
+              resolve()
+            } else {
+              reject()
+            }
+          });
+        })
+
+        // Obtenez la liste des dossiers avant la construction
+        const folderBeforeBuild = (
+          await fs.promises.readdir(`public/repos/${username}/${repo}-${branch}`, { withFileTypes: true })
+        ).filter((dirent) => dirent.isDirectory()).map((dirent) => dirent.name);
+
+        if(socket) socket.emit('progress', { step: 'Building ...', progress: 0})
+        await new Promise<void>((resolve, reject) => {
+          // Exécutez la commande `npm run build` avec une redirection des sorties standard et d'erreur
+          const npmRunBuildProcess = exec(`cd public/repos/${username}/${repo}-${branch} && npm run build`);
+          npmRunBuildProcess.stdout.on('data', (data) => {
+            console.log(data); // Afficher les sorties de npm run build dans la console
+            if(socket) socket.emit('progress', { step: 'Building ...', progress: 0, message: data})
+          });
+          npmRunBuildProcess.stderr.on('data', (data) => {
+            console.error(data); // Afficher les erreurs de npm run build dans la console
+          });
+          npmRunBuildProcess.on('close', (code) => {
+            if(code === 0) {
+              resolve()
+            } else {
+              reject()
+            }
+          });
+        })
+
+        console.log('Build process completed successfully.');
 
         const currentFolders = (await fs.promises.readdir(`public/repos/${username}/${repo}-${branch}`, { withFileTypes: true })).filter(dirent => dirent.isDirectory()).map(dirent => dirent.name)
         buildFolderName = currentFolders.find(folder => folderBeforeBuild.indexOf(folder) === -1)

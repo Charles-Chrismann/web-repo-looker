@@ -42,9 +42,8 @@ $ npm run test:cov
 
 ## TODO
 
-- Add middleware before static ressources loading to prevent relative urls problems
-- Add path to dist/build in link url
 - fix Error: ENOENT: no such file or directory, open 'public/repos/Charles-Chrismann/simple-html-main/assets/css/style.css' while writing files
+- Add front-end details/summary to display log messages
 
 ## License
 

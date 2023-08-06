@@ -1,4 +1,4 @@
-import { Body, Controller, HttpStatus, Post, Req } from '@nestjs/common';
+import { Body, Controller, HttpException, HttpStatus, Post, Req } from '@nestjs/common';
 import { FileService } from './file.service';
 import { AxiosError } from 'axios';
 import { CustomHttpException } from 'src/Custom/custom-http.exception';
@@ -25,7 +25,11 @@ export class FileController {
                     error: 'Not Found',
                 });
             }
-            throw error
+            throw new HttpException({
+                statusCode: HttpStatus.INTERNAL_SERVER_ERROR,
+                message: 'Internal server error',
+                error: 'Internal Server Error',
+            }, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }
